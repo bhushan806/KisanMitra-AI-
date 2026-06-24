@@ -89,4 +89,4 @@ The project includes an automated ML pipeline (`backend/scripts/train_all_models
 ---
 
 ## 📜 License
-This project was developed as a submission for agricultural AI innovation. All rights reserved.
+This project was developed for real users. All rights reserved.
