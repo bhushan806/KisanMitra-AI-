@@ -1,0 +1,49 @@
+================================================================================
+  KisanMitra AI — Model Accuracy Report
+================================================================================
+
+Commodity    Model           MAE (₹)   RMSE (₹)   MAPE (%)
+----------------------------------------------------------
+onion        SARIMA           378.73     395.73      19.40
+onion        XGBoost          108.18     137.87       4.87
+onion        LSTM              43.90      54.00       2.06
+onion        Ensemble          53.35      62.42       2.74
+
+potato       SARIMA            50.21      58.62       4.71
+potato       XGBoost           35.99      44.15       3.61
+potato       LSTM              24.89      31.68       2.47
+potato       Ensemble          25.71      30.97       2.41
+
+tomato       SARIMA           194.94     235.27       7.05
+tomato       XGBoost           97.71     124.12       4.87
+tomato       LSTM              74.87      93.27       3.66
+tomato       Ensemble          59.83      73.24       2.16
+
+garlic       SARIMA          2413.92    2592.63      29.32
+garlic       XGBoost          237.67     298.90       3.02
+garlic       LSTM             190.27     238.27       2.42
+garlic       Ensemble         659.00     699.69       7.96
+
+cauliflower  SARIMA           101.03     124.23       9.20
+cauliflower  XGBoost           43.50      53.65       3.62
+cauliflower  LSTM              34.22      42.27       2.84
+cauliflower  Ensemble          44.27      51.17       4.00
+
+green_chilli SARIMA          1371.06    1498.92      33.13
+green_chilli XGBoost          173.29     220.57       4.57
+green_chilli LSTM             149.51     182.63       3.87
+green_chilli Ensemble         328.10     372.31       7.93
+
+brinjal      SARIMA           226.32     272.45      20.51
+brinjal      XGBoost           36.75      44.41       3.23
+brinjal      LSTM              34.29      42.22       3.01
+brinjal      Ensemble          62.66      72.41       5.61
+
+cabbage      SARIMA           126.58     152.09      11.89
+cabbage      XGBoost           27.57      34.58       2.72
+cabbage      LSTM              22.66      28.01       2.22
+cabbage      Ensemble          26.66      32.47       2.43
+
+================================================================================
+Note: LSTM column uses sklearn MLPRegressor(128,64,32) neural network.
+Ensemble weights: SARIMA=0.2, XGBoost=0.5, LSTM/NN=0.3

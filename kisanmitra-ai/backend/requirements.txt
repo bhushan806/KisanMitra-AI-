@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+motor
+pymongo
+pydantic
+joblib
+pandas
+numpy
+scikit-learn
+xgboost
+statsmodels
+httpx
+apscheduler
+python-dotenv
+matplotlib
