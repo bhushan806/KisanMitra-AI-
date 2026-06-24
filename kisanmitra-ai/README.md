@@ -43,37 +43,29 @@ git clone https://github.com/bhushan806/KisanMitra-AI-.git
 cd KisanMitra-AI-/kisanmitra-ai
 ```
 
-### 3. Backend Setup
-```bash
-cd backend
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
-
-pip install -r requirements.txt
-```
-**Environment Variables (`backend/.env`):**
+### 3. Environment Variables
+Create a `.env` file in the `backend/` directory (if it doesn't exist already) with the following content:
 ```env
-MONGODB_URI=your_mongodb_connection_string
+MONGO_URI=your_mongodb_connection_string
 GEE_PROJECT_ID=your_google_cloud_project_id
-```
-**Start the Backend Server:**
-```bash
-uvicorn main:app --reload --port 8000
+DATA_GOV_API_KEY=your_data_gov_api_key
 ```
 
-### 4. Frontend Setup
-Open a new terminal window.
-```bash
-cd kisanmitra-ai/frontend
-npm install
+### 4. One-Click Setup & Start
+We have provided automated scripts to set up the virtual environment, install all dependencies, and start both the backend and frontend servers simultaneously.
+
+**For Windows:**
+Double-click `start.bat` from the `kisanmitra-ai` folder, or run it in your terminal:
+```cmd
+start.bat
 ```
-**Start the Frontend Server:**
+
+**For Mac/Linux:**
 ```bash
-npm run dev
+chmod +x start.sh
+./start.sh
 ```
+
 Navigate to `http://localhost:5173` to view the dashboard!
 
 ---
