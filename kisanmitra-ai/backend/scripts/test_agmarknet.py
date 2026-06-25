@@ -7,7 +7,7 @@ params = {
     "api-key": DATA_GOV_API_KEY,
     "format": "xml",
     "filters[commodity]": "Onion",
-    "limit": 10
+    "limit": 10,
 }
 
 try:
@@ -19,7 +19,7 @@ try:
     records = root.find("records")
     if records is not None:
         print(f"Found {len(records.findall('item'))} items.")
-        for item in list(records.findall('item'))[:1]:
+        for item in list(records.findall("item"))[:1]:
             for child in item:
                 print(f"{child.tag}: {child.text}")
     else:

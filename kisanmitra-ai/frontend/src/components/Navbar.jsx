@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Sprout } from 'lucide-react';
+import { Sprout, Globe, Tractor, Briefcase, Type } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getDashboardSummary } from '../utils/api';
+import { cn } from '../lib/utils';
+import { useSettings } from '../contexts/SettingsContext';
+import { useTranslation, translations } from '../locales/translations';
 
 const Navbar = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isStale, setIsStale] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+
+  const { language, setLanguage, mode, setMode, fontSize, setFontSize } = useSettings();
+  const { t } = useTranslation(language);
 
   const fetchTimestamp = async () => {
     try {
@@ -33,40 +41,160 @@ const Navbar = () => {
     }) + " IST";
   };
 
-  const linkClass = ({ isActive }) =>
-    isActive
-      ? "text-[#1B6B3A] border-b-2 border-[#1B6B3A] pb-1"
-      : "text-gray-500 hover:text-gray-900";
+  const isFarmer = mode === 'farmer';
+
+  const navItems = [
+    { name: isFarmer ? t('nav_farmer_dashboard') : t('nav_command_center'), path: '/dashboard' },
+    { name: isFarmer ? t('nav_farmer_prices') : t('nav_forecast'), path: '/forecast' },
+    { name: isFarmer ? t('nav_farmer_health') : t('nav_health'), path: '/crop-health' },
+    { name: isFarmer ? t('nav_farmer_weather') : t('nav_weather'), path: '/weather' },
+    { name: isFarmer ? t('nav_farmer_help') : t('nav_advisor'), path: '/farmer-advisory' },
+    { name: isFarmer ? t('nav_farmer_warnings') : t('nav_alerts'), path: '/alerts' },
+  ];
+
+  const langs = [
+    { code: 'en', name: t('lang_en') },
+    { code: 'hi', name: t('lang_hi') },
+    { code: 'mr', name: t('lang_mr') },
+    { code: 'gu', name: t('lang_gu') },
+    { code: 'pa', name: t('lang_pa') },
+    { code: 'ta', name: t('lang_ta') },
+    { code: 'te', name: t('lang_te') },
+    { code: 'kn', name: t('lang_kn') },
+  ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm flex-shrink-0">
-      <div className="flex items-center space-x-2">
-        <Sprout className="w-7 h-7 text-[#1B6B3A]" />
-        <span className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>KisanMitra AI</span>
+    <nav className="glass-nav px-6 py-3 flex justify-between items-center flex-shrink-0 sticky top-0 z-50">
+      <div className="flex items-center space-x-3 cursor-pointer group">
+        <div className="relative">
+          <div className="absolute inset-0 bg-emerald-500 rounded-lg blur opacity-40 group-hover:opacity-70 transition-opacity"></div>
+          <div className="relative bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-2xl">
+            <Sprout className="w-5 h-5 text-emerald-400" />
+          </div>
+        </div>
+        <span className="text-lg font-bold tracking-tight text-zinc-100">
+          KisanMitra<span className="text-emerald-500 ml-0.5">AI</span>
+        </span>
       </div>
 
-      <div className="hidden md:flex space-x-5 text-sm font-medium">
-        <NavLink to="/" className={linkClass}>Dashboard</NavLink>
-        <NavLink to="/forecast" className={linkClass}>Forecast</NavLink>
-        <NavLink to="/alerts" className={linkClass}>Alerts</NavLink>
-        <NavLink to="/crop-health" className={linkClass}>Crop Health</NavLink>
-        <NavLink to="/farmer-advisory" className={linkClass}>Farmer Advisory</NavLink>
+      <div className="hidden lg:flex items-center space-x-1 bg-zinc-900/80 p-1.5 rounded-full border border-white/10 shadow-lg backdrop-blur-xl">
+        <AnimatePresence mode="popLayout">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  "relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300",
+                  isActive ? "text-zinc-50" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5",
+                  isFarmer && "text-base font-bold px-5"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <motion.span 
+                    key={item.name}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="relative z-10"
+                  >
+                    {item.name}
+                  </motion.span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="navbar-indicator"
+                      className="absolute inset-0 bg-zinc-800 border border-white/10 rounded-full shadow-lg"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </AnimatePresence>
       </div>
 
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-4">
+        
+        {/* Mode Switcher */}
+        <button 
+          onClick={() => setMode(isFarmer ? 'professional' : 'farmer')}
+          className="flex items-center space-x-2 bg-zinc-900 border border-white/10 px-3 py-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+        >
+          {isFarmer ? <Tractor className="w-4 h-4 text-emerald-400" /> : <Briefcase className="w-4 h-4 text-blue-400" />}
+          <span className={cn("text-xs font-bold", isFarmer ? "text-emerald-400" : "text-blue-400")}>
+            {isFarmer ? t('mode_farmer') : t('mode_pro')}
+          </span>
+        </button>
+
+        {/* Font Size Toggle */}
+        <button 
+          onClick={() => setFontSize(fontSize === 'normal' ? 'large' : 'normal')}
+          className="bg-zinc-900 border border-white/10 p-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+          title="Toggle Text Size"
+        >
+          <Type className="w-4 h-4 text-zinc-400" />
+        </button>
+
+        {/* Language Switcher */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowLangMenu(!showLangMenu)}
+            className="flex items-center space-x-2 bg-zinc-900 border border-white/10 px-3 py-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+          >
+            <Globe className="w-4 h-4 text-zinc-300" />
+            <span className="text-xs font-bold text-zinc-300 uppercase">{language}</span>
+          </button>
+          
+          <AnimatePresence>
+            {showLangMenu && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 z-50"
+              >
+                {langs.map(l => (
+                  <button
+                    key={l.code}
+                    onClick={() => { setLanguage(l.code); setShowLangMenu(false); }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5",
+                      language === l.code ? "text-emerald-400 bg-emerald-500/10" : "text-zinc-300"
+                    )}
+                  >
+                    {l.name}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         {/* Live badge */}
-        <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border ${isStale ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-100'}`}>
-          <div className={`w-2 h-2 rounded-full animate-pulse ${isStale ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
-          <span className={`text-xs font-semibold ${isStale ? 'text-yellow-700' : 'text-green-700'}`}>
-            {isStale ? "Updating..." : "Live"}
+        <div className={cn(
+          "hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md",
+          isStale ? "bg-orange-500/10 border-orange-500/20" : "bg-emerald-500/10 border-emerald-500/20"
+        )}>
+          <div className="relative flex h-2 w-2">
+            <span className={cn(
+              "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
+              isStale ? "bg-orange-400" : "bg-emerald-400"
+            )}></span>
+            <span className={cn(
+              "relative inline-flex rounded-full h-2 w-2",
+              isStale ? "bg-orange-500" : "bg-emerald-500"
+            )}></span>
+          </div>
+          <span className={cn(
+            "text-[11px] font-bold tracking-wide uppercase",
+            isStale ? "text-orange-400" : "text-emerald-400"
+          )}>
+            {isStale ? "Syncing..." : t('live_feed')}
           </span>
         </div>
-        {/* Timestamp */}
-        {lastUpdated && (
-          <span className="hidden lg:inline text-[10px] text-gray-400 font-medium">
-            {formatTimestamp(lastUpdated)}
-          </span>
-        )}
       </div>
     </nav>
   );

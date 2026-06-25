@@ -7,29 +7,31 @@ from database import get_sync_collection
 
 logger = logging.getLogger(__name__)
 
+
 def save_weather_cache(records):
     """
     Saves or updates weather records in MongoDB to serve as a fallback cache.
     """
     if not records:
         return
-        
+
     try:
         coll = get_sync_collection("weather_cache")
         # Upsert records based on date and location
         for record in records:
             coll.update_one(
                 {
-                    "date": record["date"], 
-                    "latitude": record["latitude"], 
-                    "longitude": record["longitude"]
+                    "date": record["date"],
+                    "latitude": record["latitude"],
+                    "longitude": record["longitude"],
                 },
                 {"$set": record},
-                upsert=True
+                upsert=True,
             )
         logger.info(f"Successfully cached {len(records)} weather records in MongoDB.")
     except Exception as e:
         logger.error(f"Failed to cache weather data in MongoDB: {e}")
+
 
 def get_fallback_weather_data(lat: float, lon: float, start_date: str, end_date: str):
     """
@@ -41,21 +43,26 @@ def get_fallback_weather_data(lat: float, lon: float, start_date: str, end_date:
         query = {
             "latitude": lat,
             "longitude": lon,
-            "date": {"$gte": start_date, "$lte": end_date}
+            "date": {"$gte": start_date, "$lte": end_date},
         }
-        
+
         cursor = coll.find(query, {"_id": 0}).sort("date", 1)
         records = list(cursor)
-        
+
         if records:
-            logger.info(f"Retrieved {len(records)} fallback weather records from MongoDB.")
+            logger.info(
+                f"Retrieved {len(records)} fallback weather records from MongoDB."
+            )
         else:
-            logger.warning("No fallback weather records found in MongoDB for the given date range.")
-            
+            logger.warning(
+                "No fallback weather records found in MongoDB for the given date range."
+            )
+
         return records
     except Exception as e:
         logger.error(f"Failed to retrieve fallback weather data from MongoDB: {e}")
         return []
+
 
 def get_fallback_market_prices():
     """

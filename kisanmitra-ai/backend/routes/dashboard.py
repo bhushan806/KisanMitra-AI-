@@ -16,18 +16,30 @@ router = APIRouter()
 IST = timezone(timedelta(hours=5, minutes=30))
 
 
-
 MANDI_LIST = [
-    "lasalgaon", "pune", "nashik", "kolhapur",
-    "agra", "kanpur", "lucknow",
-    "bangalore", "mysore", "hubli",
-    "jaipur", "ahmedabad",
+    "lasalgaon",
+    "pune",
+    "nashik",
+    "kolhapur",
+    "agra",
+    "kanpur",
+    "lucknow",
+    "bangalore",
+    "mysore",
+    "hubli",
+    "jaipur",
+    "ahmedabad",
 ]
 
 COMMODITY_BASE_PRICES = {
-    "onion": 1500, "potato": 900, "tomato": 2000,
-    "garlic": 8000, "cauliflower": 1200, "green_chilli": 4000,
-    "brinjal": 1100, "cabbage": 800,
+    "onion": 1500,
+    "potato": 900,
+    "tomato": 2000,
+    "garlic": 8000,
+    "cauliflower": 1200,
+    "green_chilli": 4000,
+    "brinjal": 1100,
+    "cabbage": 800,
 }
 
 
@@ -47,14 +59,22 @@ def _get_market_status():
 async def get_dashboard_summary():
     now = datetime.now(IST)
     collection = get_async_collection("model_metrics")
-    
+
     # Fetch metrics
     metrics_doc = await collection.find_one({"type": "metrics"})
     metrics = metrics_doc.get("data", {}) if metrics_doc else {}
-    
+
     # Fetch data quality
     data_quality_doc = await collection.find_one({"type": "data_quality"})
-    data_quality = data_quality_doc if data_quality_doc else {"live_data_active": False, "agmarknet_last_fetch": None, "total": {"real_percentage": "0.0%"}}
+    data_quality = (
+        data_quality_doc
+        if data_quality_doc
+        else {
+            "live_data_active": False,
+            "agmarknet_last_fetch": None,
+            "total": {"real_percentage": "0.0%"},
+        }
+    )
 
     # Model accuracy for all commodities
     model_accuracy = {}
@@ -73,7 +93,9 @@ async def get_dashboard_summary():
         rng = random.Random(seed)
         hours_ago = rng.uniform(0.5, 6)
         updated_at = now - timedelta(hours=hours_ago)
-        status = "fresh" if hours_ago < 24 else ("stale" if hours_ago < 48 else "outdated")
+        status = (
+            "fresh" if hours_ago < 24 else ("stale" if hours_ago < 48 else "outdated")
+        )
         data_freshness[m] = {
             "last_updated": updated_at.isoformat(),
             "hours_ago": round(hours_ago, 1),

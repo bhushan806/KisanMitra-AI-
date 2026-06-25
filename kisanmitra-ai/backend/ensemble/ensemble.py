@@ -12,7 +12,7 @@ import os
 import sys
 
 # Ensure backend directory is in path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from database import get_sync_collection
 
 # ---------------------------------------------------------------------------
@@ -36,6 +36,24 @@ def load_all_models(commodity):
         return None, None, None, None
 
 
+def _load_dynamic_weights(commodity):
+    """Load dynamically calculated inverse-MSE weights from MongoDB."""
+    try:
+        collection = get_sync_collection("ensemble_weights")
+        doc = collection.find_one({"commodity": commodity})
+        if doc and "SARIMA" in doc:
+            return {
+                "SARIMA": round(doc["SARIMA"], 3),
+                "XGBoost": round(doc["XGBoost"], 3),
+                "LSTM": round(doc["LSTM"], 3),
+            }
+    except Exception as e:
+        print(f"Error loading dynamic weights for {commodity}: {e}")
+
+    # Fallback weights
+    return {"SARIMA": 0.2, "XGBoost": 0.5, "LSTM": 0.3}
+
+
 def _load_real_metrics(commodity):
     """Try to load computed metrics from MongoDB instead of using hardcoded values."""
     try:
@@ -43,20 +61,24 @@ def _load_real_metrics(commodity):
         metrics_doc = collection.find_one({"type": "metrics"})
         if not metrics_doc:
             return {"mae": 0, "rmse": 0, "mape": 0}
-            
+
         all_metrics = metrics_doc.get("data", {})
         ens = all_metrics.get(commodity, {}).get("Ensemble", {})
         return {
             "mae": ens.get("MAE", 0),
             "rmse": ens.get("RMSE", 0),
-            "mape": round(ens.get("MAPE", 0) / 100, 4),  # convert percentage to fraction
+            "mape": round(
+                ens.get("MAPE", 0) / 100, 4
+            ),  # convert percentage to fraction
         }
     except Exception as e:
         print(f"Error loading metrics for {commodity}: {e}")
         return {"mae": 0, "rmse": 0, "mape": 0}
 
 
-def generate_forecast(commodity, mandi, horizon, latest_features, historical_prices_30d):
+def generate_forecast(
+    commodity, mandi, horizon, latest_features, historical_prices_30d
+):
     """
     Generate an ensemble forecast.
 
@@ -79,8 +101,10 @@ def generate_forecast(commodity, mandi, horizon, latest_features, historical_pri
 
     # Generate dates
     base_date = pd.to_datetime("today")
-    dates = [(base_date + pd.Timedelta(days=i)).strftime("%Y-%m-%d")
-             for i in range(1, horizon + 1)]
+    dates = [
+        (base_date + pd.Timedelta(days=i)).strftime("%Y-%m-%d")
+        for i in range(1, horizon + 1)
+    ]
 
     # ------------------------------------------------------------------
     # 1. SARIMA Forecast
@@ -94,11 +118,27 @@ def generate_forecast(commodity, mandi, horizon, latest_features, historical_pri
     # ------------------------------------------------------------------
     # 2. XGBoost Forecast (rolling feature projection)
     # ------------------------------------------------------------------
-    xgb_features = [
-        "price_lag_7", "price_lag_14", "price_lag_30",
-        "rolling_mean_7", "rolling_mean_30", "rolling_std_7",
-        "day_of_week", "month", "temperature", "rainfall", "ndvi",
-    ]
+    # Extract feature names dynamically from the trained model to ensure 100% match
+    try:
+        xgb_features = xgb_model.feature_names_in_
+    except AttributeError:
+        # Fallback if feature_names_in_ is missing
+        xgb_features = [
+            "price_lag_7",
+            "price_lag_14",
+            "price_lag_30",
+            "rolling_mean_7",
+            "rolling_mean_30",
+            "rolling_std_7",
+            "macd",
+            "macd_signal",
+            "bollinger_high",
+            "bollinger_low",
+            "day_of_week",
+            "month",
+            "temperature",
+            "rainfall",
+        ]
 
     pred_xgb = []
     current_feat = {k: latest_features.get(k, 0) for k in xgb_features}
@@ -122,18 +162,18 @@ def generate_forecast(commodity, mandi, horizon, latest_features, historical_pri
         current_seq_scaled = np.append(current_seq_scaled, pred_val)
 
     # Inverse-transform back to price scale
-    pred_nn = scaler.inverse_transform(
-        np.array(pred_nn).reshape(-1, 1)
-    ).flatten()
+    pred_nn = scaler.inverse_transform(np.array(pred_nn).reshape(-1, 1)).flatten()
 
     # ------------------------------------------------------------------
     # 4. ENSEMBLE (weighted average)
     # ------------------------------------------------------------------
-    weights = {"SARIMA": 0.2, "XGBoost": 0.5, "LSTM": 0.3}
+    weights = _load_dynamic_weights(commodity)
 
-    final_preds = (weights["SARIMA"]  * pred_sarima
-                   + weights["XGBoost"] * np.array(pred_xgb)
-                   + weights["LSTM"]    * pred_nn)
+    final_preds = (
+        weights["SARIMA"] * pred_sarima
+        + weights["XGBoost"] * np.array(pred_xgb)
+        + weights["LSTM"] * pred_nn
+    )
 
     # Confidence intervals (combining SARIMA uncertainty with ensemble)
     final_lower = sarima_lower * 0.95
@@ -143,12 +183,14 @@ def generate_forecast(commodity, mandi, horizon, latest_features, historical_pri
     # Format output
     forecast = []
     for i in range(horizon):
-        forecast.append({
-            "date": dates[i],
-            "price": round(float(final_preds[i]), 2),
-            "lower": round(float(final_lower[i]), 2),
-            "upper": round(float(final_upper[i]), 2),
-        })
+        forecast.append(
+            {
+                "date": dates[i],
+                "price": round(float(final_preds[i]), 2),
+                "lower": round(float(final_lower[i]), 2),
+                "upper": round(float(final_upper[i]), 2),
+            }
+        )
 
     accuracy = _load_real_metrics(commodity)
 

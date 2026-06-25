@@ -8,7 +8,7 @@ files_to_check = [
     "backend/scripts/test_satellite_pipeline.py",
     "backend/scripts/train_all_models.py",
     "backend/database.py",
-    "backend/main.py"
+    "backend/main.py",
 ]
 
 print("=== PHASE 1: FILE AUDIT ===")
@@ -31,8 +31,14 @@ print("\n=== PHASE 3: MONGODB AUDIT ===")
 try:
     sys.path.append(os.path.join(os.getcwd(), "backend"))
     from database import get_sync_collection
-    
-    collections = ["market_prices", "satellite_data", "engineered_features", "model_metrics", "predictions"]
+
+    collections = [
+        "market_prices",
+        "satellite_data",
+        "engineered_features",
+        "model_metrics",
+        "predictions",
+    ]
     for coll_name in collections:
         try:
             coll = get_sync_collection(coll_name)

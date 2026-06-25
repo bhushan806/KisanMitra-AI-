@@ -33,14 +33,14 @@ MANDI_COORDS = {
 }
 
 COMMODITY_META = {
-    "onion":        {"name": "Onion",        "emoji": "\U0001f9c5", "base": 1500},
-    "potato":       {"name": "Potato",       "emoji": "\U0001f954", "base": 900},
-    "tomato":       {"name": "Tomato",       "emoji": "\U0001f345", "base": 2000},
-    "garlic":       {"name": "Garlic",       "emoji": "\U0001f9c4", "base": 8000},
-    "cauliflower":  {"name": "Cauliflower",  "emoji": "\U0001f966", "base": 1200},
+    "onion": {"name": "Onion", "emoji": "\U0001f9c5", "base": 1500},
+    "potato": {"name": "Potato", "emoji": "\U0001f954", "base": 900},
+    "tomato": {"name": "Tomato", "emoji": "\U0001f345", "base": 2000},
+    "garlic": {"name": "Garlic", "emoji": "\U0001f9c4", "base": 8000},
+    "cauliflower": {"name": "Cauliflower", "emoji": "\U0001f966", "base": 1200},
     "green_chilli": {"name": "Green Chilli", "emoji": "\U0001f336\ufe0f", "base": 4000},
-    "brinjal":      {"name": "Brinjal",      "emoji": "\U0001f346", "base": 1100},
-    "cabbage":      {"name": "Cabbage",      "emoji": "\U0001f96c", "base": 800},
+    "brinjal": {"name": "Brinjal", "emoji": "\U0001f346", "base": 1100},
+    "cabbage": {"name": "Cabbage", "emoji": "\U0001f96c", "base": 800},
 }
 
 
@@ -77,27 +77,31 @@ def get_commodities():
         change_pct = round(rng.uniform(-5, 12), 1)
         current_price = round(base * (1 + change_pct / 100))
         direction = "up" if change_pct > 0 else ("down" if change_pct < 0 else "flat")
-        alert_level = "CRITICAL" if change_pct > 10 else ("HIGH" if change_pct > 5 else "NORMAL")
+        alert_level = (
+            "CRITICAL" if change_pct > 10 else ("HIGH" if change_pct > 5 else "NORMAL")
+        )
 
         # Pick 3 representative mandis for the ticker
         mandis_sample = list(MANDI_COORDS.keys())[:3]
 
-        results.append({
-            "id": cid,
-            "name": f"{meta['name']} {meta['emoji']}",
-            "emoji": meta["emoji"],
-            "current_price": current_price,
-            "price": current_price,
-            "price_change_pct": change_pct,
-            "price_change_direction": direction,
-            "change_pct": change_pct,
-            "trend": direction,
-            "last_traded_time": _random_traded_time(),
-            "source": "Agmarknet",
-            "mandi": mandis_sample[0],
-            "alert_level": alert_level,
-            "7_day_trend": _generate_sparkline(base, seed),
-        })
+        results.append(
+            {
+                "id": cid,
+                "name": f"{meta['name']} {meta['emoji']}",
+                "emoji": meta["emoji"],
+                "current_price": current_price,
+                "price": current_price,
+                "price_change_pct": change_pct,
+                "price_change_direction": direction,
+                "change_pct": change_pct,
+                "trend": direction,
+                "last_traded_time": _random_traded_time(),
+                "source": "Agmarknet",
+                "mandi": mandis_sample[0],
+                "alert_level": alert_level,
+                "7_day_trend": _generate_sparkline(base, seed),
+            }
+        )
 
     return {"commodities": results}
 
@@ -108,7 +112,9 @@ def get_commodities():
 @router.get("/crop-health")
 async def get_crop_health(mandi: str = Query(..., description="Mandi location")):
     mandi_lower = mandi.lower()
-    coords = MANDI_COORDS.get(mandi_lower, {"lat": 20.0, "lon": 75.0, "state": "Unknown"})
+    coords = MANDI_COORDS.get(
+        mandi_lower, {"lat": 20.0, "lon": 75.0, "state": "Unknown"}
+    )
     lat, lon = coords["lat"], coords["lon"]
 
     # Attempt real Open-Meteo weather fetch
@@ -132,7 +138,9 @@ async def get_crop_health(mandi: str = Query(..., description="Mandi location"))
                 if temps:
                     temperature_avg = round(sum(temps) / len(temps), 1)
                 if precips:
-                    rainfall_30d = round(sum(precips) * 4.3, 1)  # extrapolate 7d to ~30d
+                    rainfall_30d = round(
+                        sum(precips) * 4.3, 1
+                    )  # extrapolate 7d to ~30d
     except Exception:
         pass  # Fall back to defaults
 

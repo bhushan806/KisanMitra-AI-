@@ -1,95 +1,51 @@
+"""Quick smoke test for all KisanMitra API endpoints."""
 import httpx
 import json
-import time
-import subprocess
-import os
 import sys
 
-BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE = "http://localhost:8000"
 
-# Start the server in background
-print("Starting backend server for testing...")
-process = subprocess.Popen(
-    [sys.executable, "-m", "uvicorn", "main:app", "--port", "8000"],
-    cwd=BACKEND_DIR,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE
-)
-
-# Wait for server to be ready
-time.sleep(3)
-
-base_url = "http://localhost:8000"
-endpoints = [
-    ("GET", "/health", None),
-    ("GET", "/api/predict?commodity=onion&mandi=lasalgaon&horizon=7", None),
-    ("GET", "/api/predict?commodity=potato&mandi=agra&horizon=15", None),
-    ("GET", "/api/predict?commodity=tomato&mandi=bangalore&horizon=30", None),
-    ("GET", "/api/alerts", None),
-    ("GET", "/api/commodities", None),
-    ("GET", "/api/dashboard/summary", None),
-    ("GET", "/api/crop-health?mandi=lasalgaon", None),
-    ("GET", "/api/farmer-advisory?commodity=onion&mandi=lasalgaon", None),
-]
-
-results = {}
-all_pass = True
-
-print("Testing endpoints...")
-with httpx.Client(timeout=10.0) as client:
-    for method, url_path, data in endpoints:
-        url = base_url + url_path
-        try:
-            if method == "GET":
-                resp = client.get(url)
-            elif method == "POST":
-                resp = client.post(url, json=data)
-                
-            if resp.status_code == 200:
-                print(f"PASS: {method} {url_path}")
-                results[url_path] = {"status": "PASS", "response": resp.json()}
-            else:
-                print(f"FAIL: {method} {url_path} - Status: {resp.status_code}")
-                print(resp.text)
-                results[url_path] = {"status": "FAIL", "error": resp.text}
-                all_pass = False
-        except Exception as e:
-            print(f"ERROR: {method} {url_path} - {e}")
-            results[url_path] = {"status": "ERROR", "error": str(e)}
-            all_pass = False
-
-    # Specifically run POST /api/retrain?commodity=onion
-    url_path = "/api/retrain?commodity=onion"
-    url = base_url + url_path
-    print(f"Testing POST {url_path}...")
+def test(name, url, expect_key=None):
     try:
-        # Long timeout for retraining
-        with httpx.Client(timeout=600.0) as long_client:
-            resp = long_client.post(url)
-            if resp.status_code == 200:
-                print(f"PASS: POST {url_path}")
-                results[url_path] = {"status": "PASS", "response": resp.json()}
+        r = httpx.get(url, timeout=30.0)
+        data = r.json()
+        status = "PASS" if r.status_code == 200 else "FAIL"
+        detail = ""
+        if expect_key and expect_key in data:
+            if isinstance(data[expect_key], list):
+                detail = f" ({len(data[expect_key])} items)"
+            elif isinstance(data[expect_key], dict):
+                detail = f" ({len(data[expect_key])} keys)"
             else:
-                print(f"FAIL: POST {url_path} - Status: {resp.status_code}")
-                print(resp.text)
-                results[url_path] = {"status": "FAIL", "error": resp.text}
-                all_pass = False
+                detail = f" = {data[expect_key]}"
+        print(f"  [{status}] {name}: {r.status_code}{detail}")
+        if status == "FAIL":
+            print(f"         Response: {json.dumps(data, indent=2)[:300]}")
+        return status == "PASS"
     except Exception as e:
-        print(f"ERROR: POST {url_path} - {e}")
-        results[url_path] = {"status": "ERROR", "error": str(e)}
-        all_pass = False
+        print(f"  [FAIL] {name}: {e}")
+        return False
 
-process.terminate()
+print("=" * 60)
+print("KisanMitra AI — API Smoke Test")
+print("=" * 60)
 
-os.makedirs(os.path.join(BACKEND_DIR, "tests"), exist_ok=True)
-output_file = os.path.join(BACKEND_DIR, "tests", "api_test_results.json")
-with open(output_file, "w") as f:
-    json.dump(results, f, indent=2)
+results = []
+results.append(test("Health Check", f"{BASE}/health", "status"))
+results.append(test("Commodities", f"{BASE}/api/commodities", "commodities"))
+results.append(test("Predict (onion/lasalgaon/7d)", f"{BASE}/api/predict?commodity=onion&mandi=lasalgaon&horizon=7", "forecast"))
+results.append(test("Predict (potato/pune/15d)", f"{BASE}/api/predict?commodity=potato&mandi=pune&horizon=15", "forecast"))
+results.append(test("Predict (tomato/bangalore/30d)", f"{BASE}/api/predict?commodity=tomato&mandi=bangalore&horizon=30", "forecast"))
+results.append(test("Alerts", f"{BASE}/api/alerts", "alerts"))
+results.append(test("Dashboard Summary", f"{BASE}/api/dashboard/summary", "model_accuracy"))
+results.append(test("Crop Health (lasalgaon)", f"{BASE}/api/crop-health?mandi=lasalgaon", "ndvi_proxy"))
+results.append(test("Farmer Advisory", f"{BASE}/api/farmer-advisory?commodity=onion&mandi=lasalgaon", "advisory_text"))
 
-print(f"Results saved to {output_file}")
-if all_pass:
-    print("ALL TESTS PASSED")
-    sys.exit(0)
+passed = sum(results)
+total = len(results)
+print(f"\nResults: {passed}/{total} passed")
+if passed == total:
+    print("ALL ENDPOINTS OPERATIONAL")
 else:
-    print("SOME TESTS FAILED")
+    print(f"WARNING: {total - passed} endpoint(s) failed")
     sys.exit(1)

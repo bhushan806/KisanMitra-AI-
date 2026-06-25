@@ -1,74 +1,114 @@
-import React from 'react';
-import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-zinc-900/90 backdrop-blur-md p-4 border border-white/10 shadow-2xl rounded-2xl">
+        <p className="font-bold text-zinc-100 mb-3 tracking-wide">{label}</p>
+        
+        <div className="flex items-center space-x-3 bg-zinc-800/50 p-2 rounded-lg border border-white/5 mb-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Predicted</p>
+            <p className="font-mono text-emerald-400 font-bold text-lg">
+              ₹{payload[0].value.toFixed(0)}/q
+            </p>
+          </div>
+        </div>
+
+        {payload[1] && payload[2] && (
+          <div className="text-xs text-zinc-500 mt-2 px-2">
+            <span className="block mb-1">Confidence Interval (95%)</span>
+            <span className="font-mono text-zinc-300">
+              ₹{payload[1].value.toFixed(0)} — ₹{payload[2].value.toFixed(0)}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
 
 const ForecastChart = ({ data }) => {
   if (!data || data.length === 0) return null;
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-4 border border-gray-200 shadow-lg rounded-xl">
-          <p className="font-bold text-gray-800 mb-2">{label}</p>
-          <p className="text-sm text-gray-600">
-            <span className="inline-block w-3 h-3 rounded-full bg-accent mr-2"></span>
-            Predicted: <span className="font-mono font-bold">₹{payload[0].value.toFixed(2)}</span>
-          </p>
-          {payload[1] && payload[2] && (
-            <p className="text-xs text-gray-500 mt-2 border-t pt-2">
-              Confidence Range: <br/>
-              <span className="font-mono">₹{payload[1].value.toFixed(0)} - ₹{payload[2].value.toFixed(0)}</span>
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
-    <div className="w-full h-[400px]">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+      className="w-full h-[400px] relative"
+    >
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+        <ComposedChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+          <defs>
+            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="colorConfidence" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity={0.1}/>
+              <stop offset="100%" stopColor="#10b981" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+          
           <XAxis 
             dataKey="date" 
             tickFormatter={(tick) => {
               const date = new Date(tick);
               return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
             }}
-            stroke="#9CA3AF"
+            stroke="#52525b"
             fontSize={12}
             tickLine={false}
             axisLine={false}
             dy={10}
+            fontFamily="Inter, sans-serif"
           />
+          
           <YAxis 
             tickFormatter={(tick) => `₹${tick}`} 
-            stroke="#9CA3AF" 
+            stroke="#52525b" 
             fontSize={12}
             tickLine={false}
             axisLine={false}
             dx={-10}
-            domain={['auto', 'auto']}
+            domain={['dataMin - 100', 'dataMax + 100']}
+            fontFamily="JetBrains Mono, monospace"
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend wrapperStyle={{ paddingTop: '20px' }} />
           
-          <Area type="monotone" dataKey="upper" fill="#1B6B3A" stroke="none" fillOpacity={0.05} legendType="none" />
-          <Area type="monotone" dataKey="lower" fill="#ffffff" stroke="none" fillOpacity={1} legendType="none" />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3f3f46', strokeWidth: 1, strokeDasharray: '4 4' }} />
+          
+          <Area 
+            type="monotone" 
+            dataKey="upper" 
+            stroke="none" 
+            fill="url(#colorConfidence)" 
+          />
+          <Area 
+            type="monotone" 
+            dataKey="lower" 
+            stroke="none" 
+            fill="#09090b" 
+          />
           
           <Line 
             type="monotone" 
             dataKey="price" 
             name="Predicted Price" 
-            stroke="#F59E0B" 
+            stroke="#10b981" 
             strokeWidth={3} 
-            dot={{ r: 4, fill: "#F59E0B", strokeWidth: 2, stroke: "#fff" }} 
-            activeDot={{ r: 6 }} 
+            dot={false}
+            activeDot={{ r: 6, fill: "#10b981", stroke: "#000", strokeWidth: 2 }} 
+            animationDuration={2500}
+            animationEasing="ease-out"
           />
         </ComposedChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   );
 };
 

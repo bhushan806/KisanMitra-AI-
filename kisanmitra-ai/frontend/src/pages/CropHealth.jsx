@@ -1,10 +1,80 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { getCropHealth } from '../utils/api';
-import { Map, Droplets, Thermometer, Leaf, Satellite } from 'lucide-react';
+import { Map, Droplets, Thermometer, Leaf, Satellite, CloudRain, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { useSettings } from '../contexts/SettingsContext';
+
+const CircularProgress = ({ value, max, label, color, delay }) => {
+  const percentage = (value / max) * 100;
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay }}
+      className="flex flex-col items-center relative"
+    >
+      <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="64"
+            cy="64"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            className="text-zinc-800"
+          />
+          <motion.circle
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1.5, delay: delay + 0.2, ease: "easeOut" }}
+            cx="64"
+            cy="64"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={circumference}
+            className={color}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-black text-zinc-100">{value.toFixed(1)}</span>
+        </div>
+      </div>
+      <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">{label}</h3>
+    </motion.div>
+  );
+};
+
+const FarmerStatusCard = ({ title, status, icon: Icon, colorClass, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+    className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex items-center space-x-6"
+  >
+    <div className={cn("p-4 rounded-full", colorClass.replace('text-', 'bg-').replace('500', '500/20'))}>
+      <Icon className={cn("w-12 h-12", colorClass)} />
+    </div>
+    <div>
+      <h3 className="text-xl font-bold text-zinc-400 mb-1">{title}</h3>
+      <p className="text-3xl font-extrabold text-zinc-100">{status}</p>
+    </div>
+  </motion.div>
+);
 
 const CropHealth = ({ mandi }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { mode } = useSettings();
+  const isFarmer = mode === 'farmer';
 
   useEffect(() => {
     const fetchHealth = async () => {
@@ -21,65 +91,151 @@ const CropHealth = ({ mandi }) => {
     fetchHealth();
   }, [mandi]);
 
-  if (loading) return <div className="animate-pulse bg-white rounded-xl h-64 border border-gray-100"></div>;
+  if (loading) return (
+    <div className="w-full h-[600px] bg-zinc-900/50 rounded-3xl border border-white/5 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/50 via-zinc-800/50 to-zinc-900/50 animate-[loading_2s_infinite_linear] bg-[length:200%_100%]" />
+    </div>
+  );
   if (!data) return <div>No data available</div>;
 
+  const isHighRisk = data.stress_level === 'High';
+  const isModRisk = data.stress_level === 'Moderate';
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 capitalize">Crop Health Analytics</h1>
-        <p className="text-gray-500 mt-1 flex items-center">
-          <Satellite className="w-4 h-4 mr-2" /> 
-          Satellite & Weather Proxy Indicators for {mandi.charAt(0).toUpperCase() + mandi.slice(1)}, {data.state}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">Coords: {data.coordinates?.lat}, {data.coordinates?.lon} · Source: {data.data_source}</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <Leaf className="w-8 h-8 text-green-600" />
-          </div>
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">NDVI Proxy</h3>
-          <div className="text-4xl font-mono font-bold text-gray-900 mb-2">{data.ndvi_proxy.toFixed(2)}</div>
-          <div className={`text-sm font-bold px-3 py-1 rounded-full ${
-            data.stress_level === 'Low' ? 'bg-green-100 text-green-800' :
-            data.stress_level === 'Moderate' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-          }`}>
-            {data.stress_level} Stress
-          </div>
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6">
+        <div>
+          {!isFarmer && (
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wide mb-4">
+              <Satellite className="w-3 h-3 animate-pulse" />
+              <span>MODIS SATELLITE TELEMETRY</span>
+            </div>
+          )}
+          <h1 className="text-3xl font-extrabold text-zinc-100 capitalize">
+            {isFarmer ? "Check Your Crop" : "Crop Health Center"}
+          </h1>
+          <p className="text-zinc-500 mt-1 flex items-center text-sm font-medium">
+            <Map className="w-4 h-4 mr-2 text-zinc-600" /> 
+            {isFarmer ? `Checking farms near ${mandi}, ${data.state}` : `Monitoring active farm clusters in ${mandi}, ${data.state}`}
+          </p>
         </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-            <Droplets className="w-8 h-8 text-blue-600" />
+        
+        <div className="text-right">
+          {!isFarmer && <p className="text-xs text-zinc-600 font-mono mb-1">LAT {data.coordinates?.lat} / LON {data.coordinates?.lon}</p>}
+          <div className={cn(
+            "inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold border",
+            isHighRisk ? "bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]" :
+            isModRisk ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+            "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+          )}>
+            {isHighRisk ? <AlertTriangle className="w-4 h-4 mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+            {isFarmer ? (isHighRisk ? "Crop is in Danger" : isModRisk ? "Crop Needs Attention" : "Crop is Healthy") : `${data.stress_level} Stress Detected`}
           </div>
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Rainfall (30d)</h3>
-          <div className="text-4xl font-mono font-bold text-gray-900 mb-2">{data.rainfall_30d_mm.toFixed(1)} <span className="text-xl">mm</span></div>
-          <div className="text-sm text-gray-500 font-medium">Accumulated Estimated</div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <Thermometer className="w-8 h-8 text-red-600" />
-          </div>
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Avg Temperature</h3>
-          <div className="text-4xl font-mono font-bold text-gray-900 mb-2">{data.temperature_avg.toFixed(1)} <span className="text-xl">°C</span></div>
-          <div className="text-sm text-gray-500 font-medium">Last 7 days (Mean)</div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex">
-        <div className="bg-amber-50 border border-amber-200 p-6 rounded-xl flex-1 flex items-start space-x-4">
-          <div className="bg-amber-200 p-2 rounded-full mt-1">
-            <Map className="w-6 h-6 text-amber-800" />
+      {/* Main Gauges or Cards */}
+      {isFarmer ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FarmerStatusCard 
+            title="Crop Greenness" 
+            status={data.ndvi_proxy > 0.6 ? "Very Good" : data.ndvi_proxy > 0.4 ? "Okay" : "Poor"} 
+            icon={Leaf} 
+            colorClass="text-emerald-500" 
+            delay={0.1} 
+          />
+          <FarmerStatusCard 
+            title="Recent Rain" 
+            status={data.rainfall_30d_mm > 50 ? "Plenty" : "Low"} 
+            icon={CloudRain} 
+            colorClass="text-blue-500" 
+            delay={0.2} 
+          />
+          <FarmerStatusCard 
+            title="Heat Level" 
+            status={data.temperature_avg > 35 ? "Very Hot" : "Normal"} 
+            icon={Thermometer} 
+            colorClass="text-orange-500" 
+            delay={0.3} 
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+          >
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full pointer-events-none" />
+            <CircularProgress 
+              value={data.ndvi_proxy} 
+              max={1.0} 
+              label="Vegetation Index (NDVI)" 
+              color="text-emerald-500"
+              delay={0.2}
+            />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+          >
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[50px] rounded-full pointer-events-none" />
+            <CircularProgress 
+              value={data.rainfall_30d_mm} 
+              max={200} 
+              label="30D Precipitation (mm)" 
+              color="text-blue-500"
+              delay={0.3}
+            />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+          >
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 blur-[50px] rounded-full pointer-events-none" />
+            <CircularProgress 
+              value={data.temperature_avg} 
+              max={50} 
+              label="7D Avg Temperature (°C)" 
+              color="text-orange-500"
+              delay={0.4}
+            />
+          </motion.div>
+        </div>
+      )}
+
+      {/* AI Recommendation */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="relative rounded-3xl p-1 bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-emerald-500/20"
+      >
+        <div className="bg-zinc-950 rounded-[22px] p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Leaf className="w-64 h-64" />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-amber-900 mb-2">Agronomic Recommendation</h3>
-            <p className="text-amber-800 leading-relaxed font-medium">{data.recommendation}</p>
+          
+          <div className="relative z-10">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-500 mb-4 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+              {isFarmer ? "What You Should Do" : "AI Agronomic Advisory"}
+            </h3>
+            <p className="text-xl md:text-2xl text-zinc-100 font-medium leading-relaxed max-w-4xl">
+              {data.recommendation}
+            </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

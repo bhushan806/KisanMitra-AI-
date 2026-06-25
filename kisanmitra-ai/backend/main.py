@@ -38,7 +38,9 @@ def health_check():
 async def retrain(commodity: str = "all"):
     """Trigger model retraining for a specific commodity or all."""
     try:
-        script_path = os.path.join(os.path.dirname(__file__), "scripts", "train_all_models.py")
+        script_path = os.path.join(
+            os.path.dirname(__file__), "scripts", "train_all_models.py"
+        )
         result = subprocess.run(
             [sys.executable, script_path],
             capture_output=True,
@@ -50,13 +52,17 @@ async def retrain(commodity: str = "all"):
             return {
                 "status": "success",
                 "message": f"Retraining completed for: {commodity}",
-                "output": result.stdout[-500:] if len(result.stdout) > 500 else result.stdout,
+                "output": (
+                    result.stdout[-500:] if len(result.stdout) > 500 else result.stdout
+                ),
             }
         else:
             return {
                 "status": "error",
                 "message": "Retraining failed",
-                "stderr": result.stderr[-500:] if len(result.stderr) > 500 else result.stderr,
+                "stderr": (
+                    result.stderr[-500:] if len(result.stderr) > 500 else result.stderr
+                ),
             }
     except subprocess.TimeoutExpired:
         return {"status": "error", "message": "Retraining timed out (5 min limit)"}

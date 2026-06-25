@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, Calendar, Database, Activity, Server, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getDashboardSummary } from '../utils/api';
+import { cn } from '../lib/utils';
 
 const COMMODITIES = [
   { id: 'onion', name: 'Onion', emoji: '🧅' },
   { id: 'potato', name: 'Potato', emoji: '🥔' },
   { id: 'tomato', name: 'Tomato', emoji: '🍅' },
   { id: 'garlic', name: 'Garlic', emoji: '🧄' },
-  { id: 'cauliflower', name: 'Cauliflower', emoji: '🥦' },
-  { id: 'green_chilli', name: 'Green Chilli', emoji: '🌶️' },
-  { id: 'brinjal', name: 'Brinjal', emoji: '🍆' },
-  { id: 'cabbage', name: 'Cabbage', emoji: '🥬' },
 ];
 
 const MANDI_GROUPS = [
@@ -20,32 +18,13 @@ const MANDI_GROUPS = [
       { value: 'lasalgaon', label: 'Lasalgaon' },
       { value: 'pune', label: 'Pune' },
       { value: 'nashik', label: 'Nashik' },
-      { value: 'kolhapur', label: 'Kolhapur' },
-    ],
-  },
-  {
-    state: 'Uttar Pradesh',
-    mandis: [
-      { value: 'agra', label: 'Agra' },
-      { value: 'kanpur', label: 'Kanpur' },
-      { value: 'lucknow', label: 'Lucknow' },
     ],
   },
   {
     state: 'Karnataka',
     mandis: [
       { value: 'bangalore', label: 'Bangalore' },
-      { value: 'mysore', label: 'Mysore' },
-      { value: 'hubli', label: 'Hubli' },
     ],
-  },
-  {
-    state: 'Rajasthan',
-    mandis: [{ value: 'jaipur', label: 'Jaipur' }],
-  },
-  {
-    state: 'Gujarat',
-    mandis: [{ value: 'ahmedabad', label: 'Ahmedabad' }],
   },
 ];
 
@@ -56,139 +35,131 @@ const Sidebar = ({ commodity, setCommodity, mandi, setMandi, horizon, setHorizon
 
   useEffect(() => {
     getDashboardSummary().then(setSummary).catch(() => {});
-    const interval = setInterval(() => {
-      getDashboardSummary().then(setSummary).catch(() => {});
-    }, 60000);
-    return () => clearInterval(interval);
   }, []);
 
-  // Market status helpers
   const marketStatus = summary?.market_status || 'closed';
-  const freshness = summary?.data_freshness || {};
-
-  const getMarketIcon = () => {
-    if (marketStatus === 'open') return '🟢';
-    if (marketStatus === 'pre-market') return '🟡';
-    return '🔴';
-  };
-  const getMarketLabel = () => {
-    if (marketStatus === 'open') return 'Market Open';
-    if (marketStatus === 'pre-market') return 'Pre-Market';
-    return 'Market Closed';
-  };
-  const getNextEvent = () => {
-    const now = new Date();
-    const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-    const h = ist.getHours();
-    if (h >= 9 && h < 18) {
-      const mins = (18 - h) * 60 - ist.getMinutes();
-      return `Closes in ${Math.floor(mins / 60)}h ${mins % 60}m`;
-    }
-    if (h >= 7 && h < 9) {
-      const mins = (9 - h) * 60 - ist.getMinutes();
-      return `Opens in ${Math.floor(mins / 60)}h ${mins % 60}m`;
-    }
-    // After 18:00 or before 07:00
-    const minsToOpen = h >= 18 ? (24 - h + 9) * 60 - ist.getMinutes() : (9 - h) * 60 - ist.getMinutes();
-    return `Opens in ${Math.floor(minsToOpen / 60)}h ${minsToOpen % 60}m`;
-  };
-
-  const getFreshnessDot = (mandiVal) => {
-    const f = freshness[mandiVal];
-    if (!f) return 'bg-gray-300';
-    if (f.hours_ago < 24) return 'bg-green-500';
-    if (f.hours_ago < 48) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
-  const selectedFreshness = freshness[mandi];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col p-5 space-y-5 overflow-y-auto flex-shrink-0">
+    <aside className="w-72 bg-zinc-950/80 backdrop-blur-2xl border-r border-white/5 flex flex-col p-5 space-y-8 overflow-y-auto flex-shrink-0 z-40 relative">
+      
+      {/* Background glow effect */}
+      <div className="absolute top-0 left-0 w-full h-64 bg-emerald-500/5 blur-[100px] pointer-events-none"></div>
+
       {/* Commodities */}
-      <div>
-        <h3 className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-3">Commodity</h3>
-        <div className="space-y-1">
-          {COMMODITIES.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setCommodity(c.id)}
-              className={`w-full flex items-center p-2.5 rounded-xl transition-all duration-200 text-sm ${
-                commodity === c.id
-                  ? 'bg-green-50 border border-green-200 text-green-800 shadow-sm'
-                  : 'hover:bg-gray-50 text-gray-700 border border-transparent'
-              }`}
-            >
-              <span className="text-lg mr-2">{c.emoji}</span>
-              <span className="font-semibold">{c.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Mandi dropdown grouped by state */}
-      <div>
-        <h3 className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-3 flex items-center">
-          <MapPin className="w-3 h-3 mr-1" /> Mandi / Market
+      <div className="relative z-10">
+        <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 mb-3 flex items-center">
+          <Database className="w-3 h-3 mr-2" /> Target Commodity
         </h3>
-        <select
-          value={mandi}
-          onChange={(e) => setMandi(e.target.value)}
-          className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-400/50"
-        >
-          {MANDI_GROUPS.map((group) => (
-            <optgroup key={group.state} label={`── ${group.state}`}>
-              {group.mandis.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {freshness[m.value]?.hours_ago < 24 ? '● ' : freshness[m.value]?.hours_ago < 48 ? '◐ ' : '○ '}
-                  {m.label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-        {selectedFreshness && (
-          <p className="text-[10px] text-gray-400 mt-1.5 flex items-center">
-            <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${getFreshnessDot(mandi)}`}></span>
-            {mandi.charAt(0).toUpperCase() + mandi.slice(1)} data: Updated {selectedFreshness.hours_ago}h ago
-          </p>
-        )}
+        <div className="grid grid-cols-2 gap-2">
+          {COMMODITIES.map((c) => {
+            const isActive = commodity === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setCommodity(c.id)}
+                className={cn(
+                  "relative flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 border",
+                  isActive 
+                    ? "bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                    : "bg-zinc-900 border-white/5 hover:border-white/10 hover:bg-zinc-800"
+                )}
+              >
+                {isActive && (
+                  <motion.div 
+                    layoutId="commodity-active"
+                    className="absolute inset-0 rounded-xl bg-emerald-500/5"
+                  />
+                )}
+                <span className="text-2xl mb-1 filter drop-shadow-md">{c.emoji}</span>
+                <span className={cn(
+                  "text-xs font-semibold z-10",
+                  isActive ? "text-emerald-400" : "text-zinc-400"
+                )}>{c.name}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Horizon */}
-      <div>
-        <h3 className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-3 flex items-center">
-          <Calendar className="w-3 h-3 mr-1" /> Forecast Horizon
+      {/* Market Selector */}
+      <div className="relative z-10">
+        <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 mb-3 flex items-center">
+          <MapPin className="w-3 h-3 mr-2" /> Primary Market
         </h3>
-        <div className="flex space-x-2">
-          {HORIZONS.map((h) => (
-            <button
-              key={h}
-              onClick={() => setHorizon(h)}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${
-                horizon === h
-                  ? 'bg-[#1B6B3A] text-white border-[#1B6B3A] shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              {h} Days
-            </button>
-          ))}
+        <div className="relative group">
+          <select
+            value={mandi}
+            onChange={(e) => setMandi(e.target.value)}
+            className="w-full appearance-none bg-zinc-900 border border-white/5 rounded-xl p-3 text-sm font-medium text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all cursor-pointer group-hover:border-white/10"
+          >
+            {MANDI_GROUPS.map((group) => (
+              <optgroup key={group.state} label={group.state} className="bg-zinc-900 text-zinc-400">
+                {group.mandis.map((m) => (
+                  <option key={m.value} value={m.value} className="text-zinc-100">
+                    {m.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-zinc-500">
+            ▼
+          </div>
         </div>
       </div>
 
-      {/* Market Status */}
-      <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-semibold text-gray-800">{getMarketIcon()} {getMarketLabel()}</span>
+      {/* Forecast Horizon */}
+      <div className="relative z-10">
+        <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 mb-3 flex items-center">
+          <Calendar className="w-3 h-3 mr-2" /> Predictive Horizon
+        </h3>
+        <div className="flex bg-zinc-900 p-1 rounded-xl border border-white/5">
+          {HORIZONS.map((h) => {
+            const isActive = horizon === h;
+            return (
+              <button
+                key={h}
+                onClick={() => setHorizon(h)}
+                className={cn(
+                  "relative flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors z-10",
+                  isActive ? "text-zinc-950" : "text-zinc-400 hover:text-zinc-200"
+                )}
+              >
+                {isActive && (
+                  <motion.div 
+                    layoutId="horizon-active"
+                    className="absolute inset-0 bg-emerald-400 rounded-lg -z-10 shadow-[0_0_10px_rgba(52,211,153,0.3)]"
+                  />
+                )}
+                {h}d
+              </button>
+            )
+          })}
         </div>
-        <p className="text-[10px] text-gray-400">{getNextEvent()}</p>
       </div>
 
-      {/* System Status */}
-      <div className="mt-auto bg-amber-50 rounded-xl p-3 border border-amber-100">
-        <h4 className="text-[10px] font-bold text-amber-800 uppercase mb-0.5">System Status</h4>
-        <p className="text-xs text-amber-700">Models synced successfully.</p>
+      {/* Node Status */}
+      <div className="mt-auto relative z-10">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-xl p-4">
+          <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 mb-4 flex items-center">
+            <Server className="w-3 h-3 mr-2" /> Node Status
+          </h4>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-400 flex items-center"><Activity className="w-3 h-3 mr-1.5" /> Market API</span>
+              <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded", marketStatus === 'open' ? "bg-emerald-500/10 text-emerald-400" : "bg-orange-500/10 text-orange-400")}>
+                {marketStatus.toUpperCase()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-400 flex items-center"><Zap className="w-3 h-3 mr-1.5" /> Inference Engine</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+                ONLINE
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   );
