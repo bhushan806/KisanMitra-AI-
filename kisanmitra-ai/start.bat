@@ -3,6 +3,11 @@ echo Starting KisanMitra AI...
 
 cd /d "%~dp0"
 
+if not exist .env (
+    echo Creating .env file from .env.example...
+    copy .env.example .env
+)
+
 echo [1/3] Setting up Backend...
 cd backend
 if not exist venv (

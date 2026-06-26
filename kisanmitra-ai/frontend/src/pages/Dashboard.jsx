@@ -44,8 +44,9 @@ const Dashboard = ({ commodity, mandi, horizon }) => {
   const displayComms = selectedComm ? [selectedComm, ...otherComms] : commodities.slice(0, 4);
 
   // Farmer Mode calculations
-  const startPrice = forecast?.forecast[0]?.price || 0;
-  const endPrice = forecast?.forecast[forecast.forecast.length - 1]?.price || 0;
+  const forecastList = forecast?.forecast || [];
+  const startPrice = forecastList[0]?.price || 0;
+  const endPrice = forecastList[forecastList.length > 0 ? forecastList.length - 1 : 0]?.price || 0;
   const isUp = endPrice >= startPrice;
 
   return (

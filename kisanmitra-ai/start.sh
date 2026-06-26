@@ -5,6 +5,11 @@ echo "Starting KisanMitra AI..."
 # Change to the directory of the script
 cd "$(dirname "$0")"
 
+if [ ! -f .env ]; then
+    echo "Creating .env file from .env.example..."
+    cp .env.example .env
+fi
+
 echo "[1/3] Setting up Backend..."
 cd backend
 if [ ! -d "venv" ]; then

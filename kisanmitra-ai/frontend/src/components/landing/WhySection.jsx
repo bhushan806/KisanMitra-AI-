@@ -18,7 +18,7 @@ const WhySection = () => {
           
           <div className="relative">
             <img 
-              src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=1000&auto=format&fit=crop" 
+              src="https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?q=80&w=1000&auto=format&fit=crop" 
               alt="Farmer using mobile app" 
               loading="lazy"
               className="rounded-2xl shadow-lg w-full h-[500px] object-cover border border-gray-200"
