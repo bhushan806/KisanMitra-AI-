@@ -27,7 +27,7 @@ const AlertBanner = ({ alert, index = 0 }) => {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className={cn("flex items-center p-4 rounded-2xl border mb-3 backdrop-blur-md relative overflow-hidden group hover:bg-zinc-800/50 transition-colors", colorClass)}
+      className={cn("flex items-center p-4 rounded-2xl border mb-3  relative overflow-hidden group hover:bg-gray-100 transition-colors", colorClass)}
     >
       {/* Background Warning Glow for Critical */}
       {isCritical && (
@@ -45,14 +45,14 @@ const AlertBanner = ({ alert, index = 0 }) => {
       
       <div className="flex-1 relative z-10">
         <div className="flex items-center justify-between mb-1">
-          <h4 className="font-bold text-lg capitalize text-zinc-100">{commodity} <span className="text-zinc-500 font-normal">in</span> {mandi}</h4>
+          <h4 className="font-bold text-lg capitalize text-gray-900">{commodity} <span className="text-gray-500 font-normal">in</span> {mandi}</h4>
           <span className={cn("px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest", badgeClass)}>
             {alert_level}
           </span>
         </div>
-        <div className="mt-1 flex items-center text-sm font-medium text-zinc-400">
-          <TrendingUp className="w-4 h-4 mr-2 text-zinc-500" />
-          Hitting <span className="font-mono font-bold text-zinc-200 mx-1">₹{trigger_price}</span> by {new Date(forecast_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        <div className="mt-1 flex items-center text-sm font-medium text-gray-600">
+          <TrendingUp className="w-4 h-4 mr-2 text-gray-500" />
+          Hitting <span className="font-mono font-bold text-gray-800 mx-1">₹{trigger_price}</span> by {new Date(forecast_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
           <span className={cn(
             "ml-3 px-2 py-0.5 rounded text-[10px] border font-bold uppercase tracking-wide",
             isCritical ? "border-red-500/30 text-red-400 bg-red-500/10" : "border-orange-500/30 text-orange-400 bg-orange-500/10"

@@ -4,23 +4,23 @@ import { motion } from 'framer-motion';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-900/90 backdrop-blur-md p-4 border border-white/10 shadow-2xl rounded-2xl">
-        <p className="font-bold text-zinc-100 mb-3 tracking-wide">{label}</p>
+      <div className="bg-gray-50/90  p-4 border border-gray-200 shadow-2xl rounded-2xl">
+        <p className="font-bold text-gray-900 mb-3 tracking-wide">{label}</p>
         
-        <div className="flex items-center space-x-3 bg-zinc-800/50 p-2 rounded-lg border border-white/5 mb-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <div className="flex items-center space-x-3 bg-gray-100 p-2 rounded-lg border border-gray-200 mb-2">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
           <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Predicted</p>
-            <p className="font-mono text-emerald-400 font-bold text-lg">
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Predicted</p>
+            <p className="font-mono text-primary font-bold text-lg">
               ₹{payload[0].value.toFixed(0)}/q
             </p>
           </div>
         </div>
 
         {payload[1] && payload[2] && (
-          <div className="text-xs text-zinc-500 mt-2 px-2">
+          <div className="text-xs text-gray-500 mt-2 px-2">
             <span className="block mb-1">Confidence Interval (95%)</span>
-            <span className="font-mono text-zinc-300">
+            <span className="font-mono text-gray-700">
               ₹{payload[1].value.toFixed(0)} — ₹{payload[2].value.toFixed(0)}
             </span>
           </div>

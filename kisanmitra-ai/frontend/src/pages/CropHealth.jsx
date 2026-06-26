@@ -45,10 +45,10 @@ const CircularProgress = ({ value, max, label, color, delay }) => {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-zinc-100">{value.toFixed(1)}</span>
+          <span className="text-2xl font-black text-gray-900">{value.toFixed(1)}</span>
         </div>
       </div>
-      <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">{label}</h3>
+      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest text-center">{label}</h3>
     </motion.div>
   );
 };
@@ -58,14 +58,14 @@ const FarmerStatusCard = ({ title, status, icon: Icon, colorClass, delay }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
-    className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex items-center space-x-6"
+    className="bg-white shadow-sm  border border-gray-200 rounded-3xl p-8 flex items-center space-x-6"
   >
     <div className={cn("p-4 rounded-full", colorClass.replace('text-', 'bg-').replace('500', '500/20'))}>
       <Icon className={cn("w-12 h-12", colorClass)} />
     </div>
     <div>
-      <h3 className="text-xl font-bold text-zinc-400 mb-1">{title}</h3>
-      <p className="text-3xl font-extrabold text-zinc-100">{status}</p>
+      <h3 className="text-xl font-bold text-gray-600 mb-1">{title}</h3>
+      <p className="text-3xl font-extrabold text-gray-900">{status}</p>
     </div>
   </motion.div>
 );
@@ -92,7 +92,7 @@ const CropHealth = ({ mandi }) => {
   }, [mandi]);
 
   if (loading) return (
-    <div className="w-full h-[600px] bg-zinc-900/50 rounded-3xl border border-white/5 relative overflow-hidden">
+    <div className="w-full h-[600px] bg-white shadow-sm rounded-3xl border border-gray-200 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/50 via-zinc-800/50 to-zinc-900/50 animate-[loading_2s_infinite_linear] bg-[length:200%_100%]" />
     </div>
   );
@@ -105,7 +105,7 @@ const CropHealth = ({ mandi }) => {
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-200 pb-6">
         <div>
           {!isFarmer && (
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wide mb-4">
@@ -113,10 +113,10 @@ const CropHealth = ({ mandi }) => {
               <span>MODIS SATELLITE TELEMETRY</span>
             </div>
           )}
-          <h1 className="text-3xl font-extrabold text-zinc-100 capitalize">
+          <h1 className="text-3xl font-extrabold text-gray-900 capitalize">
             {isFarmer ? "Check Your Crop" : "Crop Health Center"}
           </h1>
-          <p className="text-zinc-500 mt-1 flex items-center text-sm font-medium">
+          <p className="text-gray-500 mt-1 flex items-center text-sm font-medium">
             <Map className="w-4 h-4 mr-2 text-zinc-600" /> 
             {isFarmer ? `Checking farms near ${mandi}, ${data.state}` : `Monitoring active farm clusters in ${mandi}, ${data.state}`}
           </p>
@@ -128,7 +128,7 @@ const CropHealth = ({ mandi }) => {
             "inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold border",
             isHighRisk ? "bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]" :
             isModRisk ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
-            "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+            "bg-primary/10 text-primary border-primary/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
           )}>
             {isHighRisk ? <AlertTriangle className="w-4 h-4 mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
             {isFarmer ? (isHighRisk ? "Crop is in Danger" : isModRisk ? "Crop Needs Attention" : "Crop is Healthy") : `${data.stress_level} Stress Detected`}
@@ -143,7 +143,7 @@ const CropHealth = ({ mandi }) => {
             title="Crop Greenness" 
             status={data.ndvi_proxy > 0.6 ? "Very Good" : data.ndvi_proxy > 0.4 ? "Okay" : "Poor"} 
             icon={Leaf} 
-            colorClass="text-emerald-500" 
+            colorClass="text-primary" 
             delay={0.1} 
           />
           <FarmerStatusCard 
@@ -167,14 +167,14 @@ const CropHealth = ({ mandi }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+            className="bg-white shadow-sm  border border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
           >
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full pointer-events-none" />
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 blur-[50px] rounded-full pointer-events-none" />
             <CircularProgress 
               value={data.ndvi_proxy} 
               max={1.0} 
               label="Vegetation Index (NDVI)" 
-              color="text-emerald-500"
+              color="text-primary"
               delay={0.2}
             />
           </motion.div>
@@ -183,7 +183,7 @@ const CropHealth = ({ mandi }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+            className="bg-white shadow-sm  border border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[50px] rounded-full pointer-events-none" />
             <CircularProgress 
@@ -199,7 +199,7 @@ const CropHealth = ({ mandi }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+            className="bg-white shadow-sm  border border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 blur-[50px] rounded-full pointer-events-none" />
             <CircularProgress 
@@ -218,19 +218,19 @@ const CropHealth = ({ mandi }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="relative rounded-3xl p-1 bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-emerald-500/20"
+        className="relative rounded-3xl p-1 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20"
       >
-        <div className="bg-zinc-950 rounded-[22px] p-8 relative overflow-hidden">
+        <div className="bg-white shadow-sm rounded-[22px] p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Leaf className="w-64 h-64" />
           </div>
           
           <div className="relative z-10">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-500 mb-4 flex items-center">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-4 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
               {isFarmer ? "What You Should Do" : "AI Agronomic Advisory"}
             </h3>
-            <p className="text-xl md:text-2xl text-zinc-100 font-medium leading-relaxed max-w-4xl">
+            <p className="text-xl md:text-2xl text-gray-900 font-medium leading-relaxed max-w-4xl">
               {data.recommendation}
             </p>
           </div>

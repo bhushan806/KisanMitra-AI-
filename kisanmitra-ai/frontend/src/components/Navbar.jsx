@@ -67,17 +67,17 @@ const Navbar = () => {
     <nav className="glass-nav px-6 py-3 flex justify-between items-center flex-shrink-0 sticky top-0 z-50">
       <div className="flex items-center space-x-3 cursor-pointer group">
         <div className="relative">
-          <div className="absolute inset-0 bg-emerald-500 rounded-lg blur opacity-40 group-hover:opacity-70 transition-opacity"></div>
-          <div className="relative bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-2xl">
-            <Sprout className="w-5 h-5 text-emerald-400" />
+          <div className="absolute inset-0 bg-primary rounded-lg blur opacity-40 group-hover:opacity-70 transition-opacity"></div>
+          <div className="relative bg-gray-50 border border-gray-200 p-2 rounded-lg shadow-2xl">
+            <Sprout className="w-5 h-5 text-primary" />
           </div>
         </div>
-        <span className="text-lg font-bold tracking-tight text-zinc-100">
-          KisanMitra<span className="text-emerald-500 ml-0.5">AI</span>
+        <span className="text-lg font-bold tracking-tight text-gray-900">
+          KisanMitra<span className="text-primary ml-0.5">AI</span>
         </span>
       </div>
 
-      <div className="hidden lg:flex items-center space-x-1 bg-zinc-900/80 p-1.5 rounded-full border border-white/10 shadow-lg backdrop-blur-xl">
+      <div className="hidden lg:flex items-center space-x-1 bg-white shadow-md p-1.5 rounded-full border border-gray-200 shadow-lg ">
         <AnimatePresence mode="popLayout">
           {navItems.map((item) => (
             <NavLink
@@ -86,7 +86,7 @@ const Navbar = () => {
               className={({ isActive }) =>
                 cn(
                   "relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300",
-                  isActive ? "text-zinc-50" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5",
+                  isActive ? "text-gray-900 font-bold" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50",
                   isFarmer && "text-base font-bold px-5"
                 )
               }
@@ -105,7 +105,7 @@ const Navbar = () => {
                   {isActive && (
                     <motion.div
                       layoutId="navbar-indicator"
-                      className="absolute inset-0 bg-zinc-800 border border-white/10 rounded-full shadow-lg"
+                      className="absolute inset-0 bg-gray-100 border border-gray-200 rounded-full shadow-lg"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -121,10 +121,10 @@ const Navbar = () => {
         {/* Mode Switcher */}
         <button 
           onClick={() => setMode(isFarmer ? 'professional' : 'farmer')}
-          className="flex items-center space-x-2 bg-zinc-900 border border-white/10 px-3 py-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+          className="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-colors"
         >
-          {isFarmer ? <Tractor className="w-4 h-4 text-emerald-400" /> : <Briefcase className="w-4 h-4 text-blue-400" />}
-          <span className={cn("text-xs font-bold", isFarmer ? "text-emerald-400" : "text-blue-400")}>
+          {isFarmer ? <Tractor className="w-4 h-4 text-primary" /> : <Briefcase className="w-4 h-4 text-blue-400" />}
+          <span className={cn("text-xs font-bold", isFarmer ? "text-primary" : "text-blue-400")}>
             {isFarmer ? t('mode_farmer') : t('mode_pro')}
           </span>
         </button>
@@ -132,20 +132,20 @@ const Navbar = () => {
         {/* Font Size Toggle */}
         <button 
           onClick={() => setFontSize(fontSize === 'normal' ? 'large' : 'normal')}
-          className="bg-zinc-900 border border-white/10 p-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+          className="bg-gray-50 border border-gray-200 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
           title="Toggle Text Size"
         >
-          <Type className="w-4 h-4 text-zinc-400" />
+          <Type className="w-4 h-4 text-gray-600" />
         </button>
 
         {/* Language Switcher */}
         <div className="relative">
           <button 
             onClick={() => setShowLangMenu(!showLangMenu)}
-            className="flex items-center space-x-2 bg-zinc-900 border border-white/10 px-3 py-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+            className="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <Globe className="w-4 h-4 text-zinc-300" />
-            <span className="text-xs font-bold text-zinc-300 uppercase">{language}</span>
+            <Globe className="w-4 h-4 text-gray-700" />
+            <span className="text-xs font-bold text-gray-700 uppercase">{language}</span>
           </button>
           
           <AnimatePresence>
@@ -154,7 +154,7 @@ const Navbar = () => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 z-50"
+                className="absolute right-0 mt-2 w-48 bg-gray-50 border border-gray-200 rounded-2xl shadow-2xl overflow-hidden py-2 z-50"
               >
                 {langs.map(l => (
                   <button
@@ -162,7 +162,7 @@ const Navbar = () => {
                     onClick={() => { setLanguage(l.code); setShowLangMenu(false); }}
                     className={cn(
                       "w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5",
-                      language === l.code ? "text-emerald-400 bg-emerald-500/10" : "text-zinc-300"
+                      language === l.code ? "text-primary bg-primary/10" : "text-gray-700"
                     )}
                   >
                     {l.name}
@@ -175,22 +175,22 @@ const Navbar = () => {
 
         {/* Live badge */}
         <div className={cn(
-          "hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md",
-          isStale ? "bg-orange-500/10 border-orange-500/20" : "bg-emerald-500/10 border-emerald-500/20"
+          "hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border shadow-sm ",
+          isStale ? "bg-orange-500/10 border-orange-500/20" : "bg-primary/10 border-primary/20"
         )}>
           <div className="relative flex h-2 w-2">
             <span className={cn(
               "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-              isStale ? "bg-orange-400" : "bg-emerald-400"
+              isStale ? "bg-orange-400" : "bg-primary"
             )}></span>
             <span className={cn(
               "relative inline-flex rounded-full h-2 w-2",
-              isStale ? "bg-orange-500" : "bg-emerald-500"
+              isStale ? "bg-orange-500" : "bg-primary"
             )}></span>
           </div>
           <span className={cn(
             "text-[11px] font-bold tracking-wide uppercase",
-            isStale ? "text-orange-400" : "text-emerald-400"
+            isStale ? "text-orange-400" : "text-primary"
           )}>
             {isStale ? "Syncing..." : t('live_feed')}
           </span>

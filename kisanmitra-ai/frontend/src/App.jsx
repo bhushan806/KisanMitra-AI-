@@ -61,7 +61,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex h-screen overflow-hidden bg-[#09090b] text-zinc-100 selection:bg-emerald-500/30">
+      <div className="flex h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30">
         <Routes>
           <Route path="/" element={
             <Suspense fallback={<PageLoader />}><Landing /></Suspense>

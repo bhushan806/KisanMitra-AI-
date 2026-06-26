@@ -51,8 +51,8 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
 
   if (loading && messages.length === 0) return (
     <div className="flex items-center justify-center h-[500px]">
-      <div className="flex flex-col items-center text-zinc-500 space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      <div className="flex flex-col items-center text-gray-500 space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-sm font-bold tracking-widest uppercase animate-pulse">
           {isFarmer ? "Asking AI..." : "Initializing AI Agent..."}
         </p>
@@ -64,16 +64,16 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
     <div className="max-w-4xl mx-auto h-[calc(100vh-12rem)] flex flex-col relative animate-fade-in">
       
       {/* Chat Header */}
-      <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-zinc-900 border border-white/10 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-            <Bot className="w-6 h-6 text-emerald-400" />
+          <div className="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+            <Bot className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-zinc-100 flex items-center">
+            <h1 className="text-xl font-bold text-gray-900 flex items-center">
               {isFarmer ? "My AI Assistant" : "KisanMitra Intelligence"} <Sparkles className="w-4 h-4 ml-2 text-yellow-500" />
             </h1>
-            <p className="text-xs text-zinc-500 font-mono mt-1 uppercase tracking-wider">
+            <p className="text-xs text-gray-500 font-mono mt-1 uppercase tracking-wider">
               {isFarmer ? `${commodity} · ${mandi}` : `GPT-4 Agri-Model · ${commodity} · ${mandi}`}
             </p>
           </div>
@@ -96,18 +96,18 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
             >
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
-                msg.role === 'user' ? "bg-zinc-800 border border-white/10" : "bg-emerald-500/10 border border-emerald-500/20"
+                msg.role === 'user' ? "bg-gray-100 border border-gray-200" : "bg-primary/10 border border-primary/20"
               )}>
-                {msg.role === 'user' ? <User className="w-4 h-4 text-zinc-400" /> : <Bot className="w-4 h-4 text-emerald-400" />}
+                {msg.role === 'user' ? <User className="w-4 h-4 text-gray-600" /> : <Bot className="w-4 h-4 text-primary" />}
               </div>
               
               <div className={cn(
                 "rounded-2xl p-5 text-[15px] leading-relaxed shadow-sm",
                 msg.role === 'user' 
-                  ? "bg-zinc-800 text-zinc-200 rounded-tr-sm border border-white/5" 
-                  : "bg-transparent text-zinc-300 font-medium"
+                  ? "bg-gray-100 text-gray-800 rounded-tr-sm border border-gray-200" 
+                  : "bg-transparent text-gray-700 font-medium"
               )}>
-                <div className={isFarmer && msg.role === 'assistant' ? "text-xl font-bold leading-relaxed text-zinc-100" : ""}>
+                <div className={isFarmer && msg.role === 'assistant' ? "text-xl font-bold leading-relaxed text-gray-900" : ""}>
                   {msg.content}
                 </div>
                 
@@ -117,15 +117,15 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
                     initial={{ opacity: 0, marginTop: 0 }}
                     animate={{ opacity: 1, marginTop: 24 }}
                     transition={{ delay: 1 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/5"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-200"
                   >
-                    <div className="bg-zinc-900 border border-white/5 rounded-xl p-4">
-                      <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold block mb-1">Recommended Window</span>
-                      <span className="text-emerald-400 font-bold">{msg.meta.window}</span>
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold block mb-1">Recommended Window</span>
+                      <span className="text-primary font-bold">{msg.meta.window}</span>
                     </div>
-                    <div className="bg-zinc-900 border border-white/5 rounded-xl p-4">
-                      <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold block mb-1">Target Price</span>
-                      <span className="text-zinc-100 font-mono font-bold">₹{msg.meta.price} <span className="text-zinc-600 text-xs font-sans">/ Qtl</span></span>
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold block mb-1">Target Price</span>
+                      <span className="text-gray-900 font-mono font-bold">₹{msg.meta.price} <span className="text-zinc-600 text-xs font-sans">/ Qtl</span></span>
                     </div>
                   </motion.div>
                 )}
@@ -138,14 +138,14 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
               animate={{ opacity: 1 }}
               className="flex space-x-4 max-w-[85%]"
             >
-              <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot className="w-4 h-4 text-emerald-400" />
+              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                <Bot className="w-4 h-4 text-primary" />
               </div>
               <div className="bg-transparent p-5">
                 <div className="flex space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500/40 animate-bounce"></div>
-                  <div className="w-2 h-2 rounded-full bg-emerald-500/60 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-emerald-500/80 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
             </motion.div>
@@ -160,9 +160,9 @@ const FarmerAdvisory = ({ commodity, mandi }) => {
             type="text" 
             placeholder={isFarmer ? "Tap the microphone button to ask a question..." : "Ask a follow-up question..."} 
             disabled
-            className="w-full bg-zinc-900 border border-white/10 rounded-full py-4 pl-6 pr-14 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors shadow-lg cursor-not-allowed opacity-70"
+            className="w-full bg-gray-50 border border-gray-200 rounded-full py-4 pl-6 pr-14 text-gray-900 focus:outline-none focus:border-primary/50 transition-colors shadow-lg cursor-not-allowed opacity-70"
           />
-          <button className="absolute right-2 top-2 p-2 bg-emerald-500 rounded-full hover:bg-emerald-400 transition-colors opacity-50 cursor-not-allowed">
+          <button className="absolute right-2 top-2 p-2 bg-primary rounded-full hover:bg-primary transition-colors opacity-50 cursor-not-allowed">
             <Send className="w-4 h-4 text-zinc-950" />
           </button>
         </div>

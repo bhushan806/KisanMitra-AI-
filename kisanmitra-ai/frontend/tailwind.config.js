@@ -7,16 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#1B6B3A',
-        accent: '#F59E0B',
-        alert: {
-          red: '#DC2626',
-          orange: '#EA580C'
-        },
-        background: '#F8FAF5'
+        primary: '#2E7D32',
+        secondary: '#388E3C',
+        'light-green': '#E8F5E9',
+        accent: '#F9A825',
+        background: '#F9FAFB', // gray-50
       },
       fontFamily: {
-        heading: ['Plus Jakarta Sans', 'sans-serif'],
+        heading: ['Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       }
