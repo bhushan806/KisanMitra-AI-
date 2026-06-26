@@ -27,7 +27,7 @@ const Landing = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white relative overflow-hidden selection:bg-emerald-500/30">
+    <div className="w-full h-full overflow-y-auto overflow-x-hidden bg-[#09090b] text-white relative selection:bg-emerald-500/30">
       
       {/* Background Gradients & Grid */}
       <div className="absolute inset-0 z-0">
