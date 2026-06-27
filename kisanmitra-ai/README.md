@@ -44,7 +44,7 @@ cd KisanMitra-AI-/kisanmitra-ai
 ```
 
 ### 3. Environment Variables
-Create a `.env` file in the `backend/` directory (if it doesn't exist already) with the following content:
+Create a `.env` file in the root directory (or run start.bat which will copy `.env.example`) with the following content:
 ```env
 MONGO_URI=your_mongodb_connection_string
 GEE_PROJECT_ID=your_google_cloud_project_id
